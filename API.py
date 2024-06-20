@@ -14,27 +14,26 @@ from pyzbar.pyzbar import decode
 GOOGLE_API_KEY = "AIzaSyC81hsbRz79lDZ9Y-4gMrzz_cDhBYh-uTU"
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
-prompt = """Give name of %s after 'Food:' and specify all 'Raw Material:' 'Spices:', 'Acidity Regulators:', 'Oils:', 'Emulsifiers:', 'Flavour Enhancers:', 'Colors:' sperately under 'Ingredeints:' in new lines it has in the next line with commas starting with 'Ingredients:' and then in a new line gives all the allergies this food item can give infront of 'Allergies:'. In the next line, state the nutrients with their percentages in front of 'Nutrients:'. In New Line state if it's Veg or Non-Veg staring with 'Classification'. with no empty lines or white spaces
-EXAMPLE:
+prompt = """Give the name of %s after 'Food:' and specify all 'Raw Material:', Ingredients -> Components (contains materials that make up the raw mmaterials or displays 'None') separately under 'Ingredients:' in new lines. Start each list with commas. In the next line, state 'Hazards:', followed by the health hazards this food item can cause. Then, in the next line, state 'Allergies:', followed by all the allergies this food item can cause. Ensure there are no empty lines or extra white spaces.
+
+*Example:*
 
 Food: <Food Name>
 Ingredients:
-Raw Material: <raw material, name all sperately and not in brackets>
-Spices: <spices>
-Acidity Regulators: <acidity regulators>
-Oils: <Diffrent oils>
-Emulsifiers: <emulsifiers>
-Flavour Enhancers: <Flavour Enhancers>
-Colors:  <Added Colours>
-Allergies:  <allergies names only>
-Nutrients: <Nutrient with percentage or unit in brackets don't use ':'>
-Classification: <Veg or Non-Veg>
+Raw Material: <raw material, name all separately, and include spices, flavors, oils, colors, if raw materials consist of more components that are used to make it, display theses components it inside of brackets after the raw material, else DISPLAY (None) after the raw material> eg: Chocolate (mill, cocoa), Salt (None), Sunflower Oil (None)
+Hazards: <health hazards, name diseases or any illness that might be caused due consuming this product normally and by over eating it,  names of diseases/illnesses only>
+Allergies: <allergies caused from any of the raw materials, names only>
+
+
+NOTE: THERE HAS TO BE EITHER 'NONE' OR COMPONENTS THAT MAKE UP THE RAW MATERIALS IN A BRACKET AFTER ANY RAW MATERIAL NAME
+eg <raw material name> (componatents used to make it), <raw material name> (NONE) 
 """
 def display(response):
     lists = response.split('\n')
     biggest = 0
     for i,list in enumerate(lists):
-        lists[i] = list.split(':')
+        st = list.find(':')
+        lists[i] = [list[0:st],list[st+1:]]
         if lists[i][0] == '':
             lists.pop(i)
             continue
@@ -53,8 +52,17 @@ def display(response):
         if len(temp) > biggest: biggest = len(temp)
         lists[i][1] = temp
     
-        #print(list)
-    return dict(lists)
+    print("INITIATING RAW MATERIAL SEPERATION")
+    dic = dict(lists)
+    if len(dic["Raw Material"]) <= 3: raise(AttributeError)
+    for i, raw in enumerate(dic["Raw Material"]):
+        if raw.find('(') != -1:
+            st = raw.find('(')
+            dic['Raw Material'][i] = [raw[0:st],raw[st+1:-1].split(',')]
+        else:
+            dic['Raw Material'][i] = [raw,['None']]
+        print(dic['Raw Material'][i])
+    return dic
     
 def text(TEXT):
     try: 
@@ -71,7 +79,9 @@ def img(IMAGE):
         response.resolve()
         res = response.text.replace('*',"")
         print(res)
-        return display(res)
+        print('IMAGE DONE PROCESSING')
+        dic = display(res)
+        return  dic
     except google.api_core.exceptions.InternalServerError: img(IMAGE)
     except AttributeError: img(IMAGE)
     except IndexError: img(IMAGE)
@@ -96,7 +106,6 @@ def get_food_name_openfoodfacts(barcode):
         else: return "Product Not Found"
     
 def BarcodeReader(IMAGE): 
-    IMAGE.show()
     img = numpy.array(IMAGE)
     detectedBarcodes = decode(IMAGE) 
        
@@ -181,8 +190,8 @@ def using_foodImage():
     if request.method == "POST":
         data = request.get_json()
         im = Image.open(BytesIO(base64.b64decode(data['encodedImage'])))
-        im.show()
-        return jsonify(img(im)), 200
+        dic = img(im)
+        return jsonify(dic), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
