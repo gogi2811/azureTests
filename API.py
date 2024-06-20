@@ -93,6 +93,7 @@ def get_food_name_openfoodfacts(barcode):
                 t = name,company
             else: t = name
             return text(str(t))
+        else: return "Product Not Found"
     
 def BarcodeReader(IMAGE): 
     IMAGE.show()
@@ -152,7 +153,6 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 
 app.register_blueprint(swaggerui_blueprint)
-app.run()
 
 @app.route("/food-name",methods=["POST"])
 def using_name():
@@ -165,6 +165,7 @@ def using_name():
 def using_barcode():
     if request.method == "POST":
         data = request.get_json()
+        print(data)
         data = get_food_name_openfoodfacts(data['barcode'])
         return jsonify(data), 200
     
