@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/8203ecb9-f6f1-4289-93a2-ddf0c9e7ec38/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/nutrigen-test",
+    "appService.deploySubpath": "."
+}
