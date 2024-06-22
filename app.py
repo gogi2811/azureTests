@@ -4,9 +4,7 @@ import requests
 import google
 import cv2
 import google.generativeai as genai
-import PIL.Image
 import numpy
-import pandas as pd
 import base64
 from PIL import Image
 from io import BytesIO
