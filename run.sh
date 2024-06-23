@@ -19,4 +19,4 @@ apt-get install -y python3-pip &&
 echo "Installing Python packages from requirements.txt..."
 pip3 install -r requirements.txt &&
 
-python -m waitress-serve --listen=*:8000 app:app
+gunicorn --bind=0.0.0.0 --timeout 600 app:app
