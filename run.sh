@@ -11,10 +11,6 @@ apt-get install -y libzbar0 &&
 echo "Installing cv2..."
 apt-get install ffmpeg libsm6 libxext6  -y
 
-# Install waitress using apt
-echo "Installing python-waitress..."
-apt-get install -y python-waitress &&
-
 # Install pip if not already installed
 echo "Installing python3-pip..."
 apt-get install -y python3-pip &&
