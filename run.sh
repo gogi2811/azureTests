@@ -7,6 +7,10 @@ apt-get install -y apt-utils &&
 echo "Installing libzbar0..."
 apt-get install -y libzbar0 &&
 
+# Install the cv2 library
+echo "Installing cv2..."
+apt-get install ffmpeg libsm6 libxext6  -y
+
 # Install waitress using apt
 echo "Installing python-waitress..."
 apt-get install -y python-waitress &&
