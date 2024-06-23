@@ -18,6 +18,5 @@ apt-get install -y python3-pip &&
 # Install Python packages from requirements.txt
 echo "Installing Python packages from requirements.txt..."
 pip3 install -r requirements.txt &&
-# Install Python packages from requirements.txt
-pip3 install -r requirements.txt &&
-waitress-serve --listen=*:8000 app:app
+
+python -m waitress-serve --listen=*:8000 app:app
